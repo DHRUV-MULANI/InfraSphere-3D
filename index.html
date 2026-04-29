@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HS 225002 - 3D Study Guide</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow-x:hidden}
+.scene{perspective:1200px;width:100%;min-height:100vh}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:100;background:rgba(10,10,46,.95);backdrop-filter:blur(10px);padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+nav ul{display:flex;justify-content:center;gap:8px;list-style:none;flex-wrap:wrap;padding:0 10px}
+nav a{color:#aaa;text-decoration:none;padding:8px 16px;border-radius:20px;font-size:13px;transition:.3s;cursor:pointer}
+nav a:hover,nav a.active{color:#fff;background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 0 20px rgba(102,126,234,.4)}
+
+/* HERO */
+.hero{height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(2rem,5vw,4rem);background:linear-gradient(135deg,#667eea,#764ba2,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:15px}
+.hero p{color:#888;font-size:1.1rem;max-width:600px;margin:0 auto}
+.hero-sub{margin-top:20px;display:flex;gap:15px;justify-content:center;flex-wrap:wrap}
+.hero-sub span{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:8px 20px;border-radius:20px;font-size:.85rem;color:#ccc}
+
+/* FLOATING 3D CUBES */
+.cube-container{position:absolute;width:100%;height:100%;top:0;left:0;pointer-events:none;overflow:hidden}
+.floating-cube{position:absolute;transform-style:preserve-3d;animation:floatCube 8s ease-in-out infinite}
+.floating-cube div{position:absolute;width:60px;height:60px;border:1px solid rgba(102,126,234,.2);background:rgba(102,126,234,.03);border-radius:8px}
+.floating-cube .front{transform:translateZ(30px)}.floating-cube .back{transform:translateZ(-30px) rotateY(180deg)}
+.floating-cube .left{transform:translateX(-30px) rotateY(-90deg)}.floating-cube .right{transform:translateX(30px) rotateY(90deg)}
+@keyframes floatCube{0%,100%{transform:translateY(0) rotateX(0) rotateY(0)}50%{transform:translateY(-30px) rotateX(180deg) rotateY(180deg)}}
+
+/* SECTIONS */
+section{padding:80px 20px;max-width:1200px;margin:0 auto}
+section h2{font-size:2rem;text-align:center;margin-bottom:40px;background:linear-gradient(135deg,#667eea,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* BIG PICTURE CHAIN */
+.chain{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:30px 0;perspective:800px}
+.chain-node{background:linear-gradient(135deg,#1a1a4e,#2a2a6e);border:1px solid rgba(102,126,234,.3);padding:18px 22px;border-radius:14px;text-align:center;min-width:180px;transform:rotateY(0deg);transition:transform .6s,box-shadow .3s;cursor:pointer}
+.chain-node:hover{transform:rotateY(15deg) scale(1.05);box-shadow:0 0 30px rgba(102,126,234,.4)}
+.chain-node h4{color:#667eea;font-size:.95rem;margin-bottom:6px}
+.chain-node p{font-size:.75rem;color:#888}
+.chain-arrow{font-size:1.5rem;color:#667eea;padding:0 5px;flex-shrink:0}
+
+/* 3D FLIP CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;margin-top:30px}
+.card-3d{perspective:1000px;height:380px;cursor:pointer}
+.card-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)}
+.card-3d.flipped .card-inner{transform:rotateY(180deg)}
+.card-front,.card-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px;padding:25px;overflow-y:auto}
+.card-front{background:linear-gradient(145deg,#141438,#1e1e52);border:1px solid rgba(102,126,234,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.card-front .icon{font-size:3rem;margin-bottom:15px}
+.card-front h3{font-size:1.3rem;margin-bottom:8px}
+.card-front p{color:#888;font-size:.85rem}
+.card-front .tag{margin-top:12px;padding:4px 14px;border-radius:12px;font-size:.7rem;background:rgba(102,126,234,.15);color:#667eea}
+.card-back{background:linear-gradient(145deg,#1a1a50,#252568);border:1px solid rgba(240,147,251,.2);transform:rotateY(180deg)}
+.card-back h4{color:#f093fb;margin-bottom:10px;font-size:1rem}
+.card-back ul{list-style:none;padding:0}
+.card-back li{padding:5px 0;font-size:.8rem;color:#ccc;border-bottom:1px solid rgba(255,255,255,.05);line-height:1.4}
+.card-back li:before{content:'>';color:#667eea;margin-right:8px;font-weight:bold}
+.card-back .flip-hint{text-align:center;color:#555;font-size:.7rem;margin-top:10px}
+
+/* CASE STUDY SECTION */
+.case-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.case-card{background:linear-gradient(145deg,#141438,#1e1e52);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px;transition:transform .4s,box-shadow .4s;transform-style:preserve-3d}
+.case-card:hover{transform:translateZ(20px) rotateX(2deg) rotateY(-2deg);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.case-card h3{font-size:1.05rem;margin-bottom:5px}
+.case-card .subtitle{color:#888;font-size:.8rem;margin-bottom:12px}
+.case-tag{display:inline-block;padding:3px 10px;border-radius:10px;font-size:.65rem;margin:2px}
+.tag-risk{background:rgba(255,82,82,.15);color:#ff5252}
+.tag-viability{background:rgba(102,126,234,.15);color:#667eea}
+.tag-asset{background:rgba(76,175,80,.15);color:#4caf50}
+.tag-smart{background:rgba(255,193,7,.15);color:#ffc107}
+.case-card table{width:100%;margin-top:10px;border-collapse:collapse;font-size:.75rem}
+.case-card td,.case-card th{padding:6px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,.05)}
+.case-card th{color:#667eea;font-weight:600}
+
+/* FORMULA SECTION */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.formula-card{background:linear-gradient(145deg,#0d0d2b,#181848);border:1px solid rgba(240,147,251,.15);border-radius:14px;padding:20px;transition:transform .3s;transform-style:preserve-3d}
+.formula-card:hover{transform:scale(1.03) rotateX(3deg)}
+.formula-card h4{color:#f093fb;margin-bottom:8px;font-size:.95rem}
+.formula-card .formula{background:rgba(0,0,0,.3);padding:12px;border-radius:10px;font-family:'Courier New',monospace;font-size:.82rem;color:#7ee8fa;margin:8px 0;line-height:1.5;overflow-x:auto}
+.formula-card .rule{color:#4caf50;font-size:.78rem;margin-top:6px}
+.formula-card .example{color:#999;font-size:.75rem;margin-top:6px;padding:8px;background:rgba(255,255,255,.03);border-radius:8px;font-family:'Courier New',monospace;line-height:1.4}
+
+/* COMPARISON TABLE */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.82rem}
+.comp-table th{background:rgba(102,126,234,.15);color:#667eea;padding:10px;text-align:left}
+.comp-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.comp-table tr:hover{background:rgba(255,255,255,.02)}
+
+/* PPP SPECTRUM */
+.spectrum{display:flex;align-items:center;margin:20px 0;padding:20px;background:rgba(255,255,255,.02);border-radius:14px;overflow-x:auto;gap:0}
+.spectrum-node{text-align:center;padding:10px 14px;min-width:90px;position:relative;flex-shrink:0}
+.spectrum-node .dot{width:14px;height:14px;border-radius:50%;margin:0 auto 8px;transition:transform .3s}
+.spectrum-node:hover .dot{transform:scale(1.8)}
+.spectrum-node span{font-size:.7rem;color:#aaa;display:block}
+.spectrum-node small{font-size:.6rem;color:#555}
+.spectrum-line{height:2px;flex:1;min-width:15px;background:linear-gradient(90deg,#667eea,#f093fb)}
+.govt-dot{background:#667eea}.pvt-dot{background:#f093fb}
+.spectrum-labels{display:flex;justify-content:space-between;font-size:.75rem;color:#666;margin-bottom:5px;padding:0 10px}
+
+/* RISK MATRIX */
+.risk-matrix{display:grid;grid-template-columns:auto repeat(3,1fr);gap:3px;max-width:400px;margin:20px auto;font-size:.75rem;text-align:center}
+.rm-cell{padding:14px 10px;border-radius:8px}
+.rm-header{color:#667eea;font-weight:bold;padding:10px}
+.rm-vh{background:rgba(255,0,0,.2);color:#ff5252}
+.rm-h{background:rgba(255,152,0,.2);color:#ff9800}
+.rm-m{background:rgba(255,193,7,.2);color:#ffc107}
+.rm-l{background:rgba(76,175,80,.2);color:#4caf50}
+.rm-vl{background:rgba(76,175,80,.1);color:#81c784}
+.rm-label{color:#888;display:flex;align-items:center;justify-content:center;font-weight:600}
+
+/* EXAM TIPS */
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:20px}
+.tip-card{background:linear-gradient(145deg,#141438,#1e1e52);border-left:3px solid;padding:20px;border-radius:0 14px 14px 0}
+.tip-card h4{margin-bottom:8px;font-size:.95rem}
+.tip-card p{color:#aaa;font-size:.8rem;line-height:1.5}
+.tip-theory{border-color:#667eea}
+.tip-case{border-color:#f093fb}
+.tip-num{border-color:#4caf50}
+
+/* CONNECTOR LINES (visual) */
+.connector{text-align:center;color:#667eea;font-size:.8rem;padding:15px;opacity:.5}
+
+/* SCROLL ANIMATIONS */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* MOBILE */
+@media(max-width:768px){
+  section{padding:60px 12px}
+  .chain{flex-direction:column;gap:8px}
+  .chain-arrow{transform:rotate(90deg)}
+  .card-3d{height:auto;min-height:350px}
+  .spectrum{flex-wrap:wrap;gap:5px}
+  nav a{font-size:11px;padding:6px 12px}
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0a0a2e}
+::-webkit-scrollbar-thumb{background:#667eea;border-radius:3px}
+</style>
+</head>
+<body>
+
+<nav>
+<ul>
+  <li><a href="#home" class="active">Home</a></li>
+  <li><a href="#bigpic">Big Picture</a></li>
+  <li><a href="#theory">Theory</a></li>
+  <li><a href="#cases">Case Studies</a></li>
+  <li><a href="#formulas">Formulas</a></li>
+  <li><a href="#tips">Exam Tips</a></li>
+</ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="cube-container">
+    <div class="floating-cube" style="top:15%;left:10%;animation-delay:0s"><div class="front"></div><div class="back"></div><div class="left"></div><div class="right"></div></div>
+    <div class="floating-cube" style="top:60%;left:80%;animation-delay:2s;animation-duration:10s"><div class="front"></div><div class="back"></div><div class="left"></div><div class="right"></div></div>
+    <div class="floating-cube" style="top:30%;left:70%;animation-delay:4s;animation-duration:12s"><div class="front"></div><div class="back"></div><div class="left"></div><div class="right"></div></div>
+    <div class="floating-cube" style="top:75%;left:20%;animation-delay:1s;animation-duration:9s"><div class="front"></div><div class="back"></div><div class="left"></div><div class="right"></div></div>
+  </div>
+  <div>
+    <h1>Infrastructure Planning & Management</h1>
+    <p>HS 225002 | B.Tech Sem VI | Connected Study Guide</p>
+    <div class="hero-sub">
+      <span>Theory 20m</span>
+      <span>Case Studies 20m</span>
+      <span>Numericals 20m</span>
+    </div>
+  </div>
+</section>
+
+<!-- BIG PICTURE -->
+<section id="bigpic">
+  <h2 class="reveal">The Big Picture: Everything Connects</h2>
+  <p style="text-align:center;color:#888;margin-bottom:30px" class="reveal">Every infrastructure project follows this chain. Each case study is just this chain in action.</p>
+  <div class="chain reveal">
+    <div class="chain-node">
+      <h4>VIABILITY CHECK</h4>
+      <p>Should we build?<br>NPV, IRR, BCR, PPP</p>
+    </div>
+    <span class="chain-arrow">&#10132;</span>
+    <div class="chain-node">
+      <h4>RISK ASSESSMENT</h4>
+      <p>What can go wrong?<br>Risk Matrix, EMV</p>
+    </div>
+    <span class="chain-arrow">&#10132;</span>
+    <div class="chain-node">
+      <h4>ASSET MANAGEMENT</h4>
+      <p>How to maintain?<br>Lifecycle, ISO 55000</p>
+    </div>
+    <span class="chain-arrow">&#10132;</span>
+    <div class="chain-node">
+      <h4>SMART MONITORING</h4>
+      <p>How to optimize?<br>IoT, Digital Twin, AI</p>
+    </div>
+  </div>
+
+  <div class="connector reveal">&#8595; Applied to every case study below &#8595;</div>
+
+  <!-- PPP SPECTRUM -->
+  <h3 style="text-align:center;color:#ccc;margin:30px 0 10px" class="reveal">PPP Model Spectrum</h3>
+  <div class="spectrum-labels reveal"><span>More Govt Control &#9664;</span><span>&#9654; More Private Control</span></div>
+  <div class="spectrum reveal">
+    <div class="spectrum-node"><div class="dot govt-dot"></div><span>Service<br>Contract</span></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot govt-dot"></div><span>Mgmt<br>Contract</span></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot govt-dot"></div><span>Lease</span></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot" style="background:#9c7eea"></div><span>BOT</span><small>Dabhol</small></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot" style="background:#b87eea"></div><span>BOOT</span></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot" style="background:#d07eea"></div><span>DBFO</span><small>Vizhinjam</small></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot pvt-dot"></div><span>BOO</span></div>
+    <div class="spectrum-line"></div>
+    <div class="spectrum-node"><div class="dot pvt-dot"></div><span>Full<br>Privatize</span></div>
+  </div>
+
+  <table class="comp-table reveal" style="margin-top:30px">
+    <tr><th>Model</th><th>Build</th><th>Own</th><th>Operate</th><th>Transfer?</th><th>Finance</th></tr>
+    <tr><td>BOT</td><td>Private</td><td>Govt</td><td>Private</td><td>Yes</td><td>Private</td></tr>
+    <tr><td>BOOT</td><td>Private</td><td>Pvt&#8594;Govt</td><td>Private</td><td>Yes</td><td>Private</td></tr>
+    <tr><td>DBFO</td><td>Private</td><td>Govt</td><td>Private</td><td>Yes</td><td>Private</td></tr>
+    <tr><td>BOO</td><td>Private</td><td>Private</td><td>Private</td><td>No</td><td>Private</td></tr>
+  </table>
+</section>
+
+<!-- THEORY - 4 PILLARS -->
+<section id="theory">
+  <h2 class="reveal">4 Pillars of Theory (20 Marks)</h2>
+  <p style="text-align:center;color:#888;margin-bottom:10px" class="reveal">Click cards to flip and see details</p>
+
+  <div class="cards">
+    <!-- CARD 1: Viability -->
+    <div class="card-3d reveal" onclick="this.classList.toggle('flipped')">
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="icon">&#128200;</div>
+          <h3>Project Viability</h3>
+          <p>"Should we build it?"</p>
+          <div class="tag">NPV | IRR | BCR | PPP</div>
+        </div>
+        <div class="card-back">
+          <h4>Project Viability</h4>
+          <ul>
+            <li><b>NPV > 0</b> = Accept project</li>
+            <li><b>IRR > required rate</b> = Accept</li>
+            <li><b>BCR > 1</b> = Benefits exceed costs</li>
+            <li><b>Payback Period</b> = Shorter is better</li>
+            <li><b>Financial viability</b> = Will investors profit?</li>
+            <li><b>Economic viability</b> = Will society benefit?</li>
+            <li>When financial &#8595; but economic &#8593; &#8594; Govt steps in via PPP</li>
+            <li><b>Feasibility</b> = Technical + Financial + Economic + Environmental + Social</li>
+            <li>Vizhinjam: NPV negative without govt grant</li>
+          </ul>
+          <div class="flip-hint">click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Risk -->
+    <div class="card-3d reveal" onclick="this.classList.toggle('flipped')">
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="icon">&#9888;&#65039;</div>
+          <h3>Risk Management</h3>
+          <p>"What can go wrong?"</p>
+          <div class="tag">PFCEO | Matrix | EMV | ATMA</div>
+        </div>
+        <div class="card-back">
+          <h4>Risk Management</h4>
+          <ul>
+            <li><b>Process:</b> Identify &#8594; Assess &#8594; Mitigate &#8594; Monitor</li>
+            <li><b>PFCEO risks:</b> Political, Financial, Construction, Environmental, Operational</li>
+            <li><b>Risk Matrix:</b> Probability x Impact (1-5 each)</li>
+            <li><b>EMV</b> = Probability x Impact (in Rs.)</li>
+            <li><b>ATMA response:</b> Avoid, Transfer, Mitigate, Accept</li>
+            <li><b>Risk Allocation:</b> Give risk to party best able to manage</li>
+            <li>Construction risk &#8594; Private | Political &#8594; Govt</li>
+            <li><b>Monte Carlo:</b> 1000s of random scenarios &#8594; probability distribution</li>
+            <li><b>Sensitivity:</b> Change 1 variable &#8594; see NPV change</li>
+          </ul>
+          <div class="flip-hint">click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: Asset -->
+    <div class="card-3d reveal" onclick="this.classList.toggle('flipped')">
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="icon">&#9881;&#65039;</div>
+          <h3>Asset Management</h3>
+          <p>"How to maintain what we built?"</p>
+          <div class="tag">ISO 55000 | Lifecycle | Valuation</div>
+        </div>
+        <div class="card-back">
+          <h4>Asset Management</h4>
+          <ul>
+            <li><b>ISO 55000:</b> Align assets with org objectives</li>
+            <li><b>Lifecycle:</b> Plan &#8594; Acquire &#8594; Operate &#8594; Maintain &#8594; Dispose</li>
+            <li><b>Historical Cost:</b> What you paid (books)</li>
+            <li><b>Replacement Cost:</b> Cost to replace today (insurance)</li>
+            <li><b>Market Value:</b> What someone would pay (selling)</li>
+            <li><b>DRC:</b> Replacement cost minus wear (fair value)</li>
+            <li><b>Maintenance:</b> Reactive &#8594; Preventive &#8594; Condition-Based &#8594; Predictive</li>
+            <li><b>Condition Assessment:</b> Rate health 1-5, drives priority</li>
+            <li><b>AM Plan:</b> Inventory + Condition + Strategy + Finance + Risk</li>
+          </ul>
+          <div class="flip-hint">click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4: Smart -->
+    <div class="card-3d reveal" onclick="this.classList.toggle('flipped')">
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="icon">&#128225;</div>
+          <h3>Smart Infrastructure</h3>
+          <p>"How to optimize with tech?"</p>
+          <div class="tag">IoT | Digital Twin | BIM | AI</div>
+        </div>
+        <div class="card-back">
+          <h4>Smart Infrastructure</h4>
+          <ul>
+            <li><b>IoT:</b> Sensors collecting real-time data</li>
+            <li><b>Digital Twin:</b> Virtual replica of physical asset</li>
+            <li><b>BIM:</b> 3D model for design + construction</li>
+            <li><b>AI/ML:</b> Predictive maintenance, demand forecast</li>
+            <li><b>Smart Transport:</b> GPS, adaptive signals, EV</li>
+            <li><b>Smart Grid:</b> Smart meters, renewable integration</li>
+            <li><b>Smart Water:</b> Leak detection, quality monitoring</li>
+            <li><b>Cybersecurity:</b> Critical - connected = vulnerable</li>
+            <li>Smart &#8594; better Asset Mgmt, Risk Mgmt, Viability decisions</li>
+          </ul>
+          <div class="flip-hint">click to flip back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RISK MATRIX VISUAL -->
+  <h3 style="text-align:center;color:#ccc;margin:40px 0 15px" class="reveal">Risk Matrix (Probability x Impact)</h3>
+  <div class="risk-matrix reveal">
+    <div class="rm-cell"></div>
+    <div class="rm-header">Low Impact</div>
+    <div class="rm-header">Med Impact</div>
+    <div class="rm-header">High Impact</div>
+    <div class="rm-label">High Prob</div>
+    <div class="rm-cell rm-m">MEDIUM</div>
+    <div class="rm-cell rm-h">HIGH</div>
+    <div class="rm-cell rm-vh">CRITICAL</div>
+    <div class="rm-label">Med Prob</div>
+    <div class="rm-cell rm-l">LOW</div>
+    <div class="rm-cell rm-m">MEDIUM</div>
+    <div class="rm-cell rm-h">HIGH</div>
+    <div class="rm-label">Low Prob</div>
+    <div class="rm-cell rm-vl">V.LOW</div>
+    <div class="rm-cell rm-l">LOW</div>
+    <div class="rm-cell rm-m">MEDIUM</div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases">
+  <h2 class="reveal">Case Studies &#8596; Theory Map (20 Marks)</h2>
+
+  <div class="case-grid">
+    <!-- Dabhol -->
+    <div class="case-card reveal" style="perspective:600px">
+      <h3 style="color:#ff5252">Dabhol Power Project</h3>
+      <div class="subtitle">$3B | 2184 MW | Enron + MSEB | PPP FAILURE</div>
+      <span class="case-tag tag-risk">Risk Mgmt</span>
+      <span class="case-tag tag-viability">Viability</span>
+      <table>
+        <tr><th>Risk Type</th><th>What Happened</th></tr>
+        <tr><td>Political</td><td>BJP govt cancelled project (1995)</td></tr>
+        <tr><td>Financial</td><td>Dollar tariff in rupee economy</td></tr>
+        <tr><td>Demand</td><td>Oversized - MSEB couldn't absorb</td></tr>
+        <tr><td>Regulatory</td><td>No competitive bidding</td></tr>
+        <tr><td>Contractual</td><td>One-sided PPA favoring Enron</td></tr>
+      </table>
+      <p style="color:#4caf50;font-size:.75rem;margin-top:10px"><b>Lesson:</b> World Bank warned. Risk allocation was wrong. No political consensus. Non-competitive process.</p>
+    </div>
+
+    <!-- Airport -->
+    <div class="case-card reveal" style="perspective:600px">
+      <h3 style="color:#4caf50">Airport Privatization (DEL/BOM)</h3>
+      <div class="subtitle">Rs.54B | JVC Model | 74% Private + 26% AAI | PPP SUCCESS</div>
+      <span class="case-tag tag-risk">Risk Mgmt</span>
+      <span class="case-tag tag-viability">Viability</span>
+      <table>
+        <tr><th>Aspect</th><th>Detail</th></tr>
+        <tr><td>Model</td><td>JVC via OMDA, 30+30yr lease</td></tr>
+        <tr><td>Bidding</td><td>9 PQBs, 4-phase evaluation</td></tr>
+        <tr><td>Revenue</td><td>% of gross revenue shared with govt</td></tr>
+        <tr><td>Oversight</td><td>EC, GRC, GETE, CoS, IMG, EGoM</td></tr>
+        <tr><td>Controversy</td><td>GETE qualified only GMR-Fraport</td></tr>
+      </table>
+      <p style="color:#4caf50;font-size:.75rem;margin-top:10px"><b>Lesson:</b> Transparent process, multiple review bodies, revenue sharing = better risk allocation than Dabhol.</p>
+    </div>
+
+    <!-- Vizhinjam -->
+    <div class="case-card reveal" style="perspective:600px">
+      <h3 style="color:#ffc107">Vizhinjam Port (VISL)</h3>
+      <div class="subtitle">DBFOT | Adani Ports | Kerala | Viability Gap Funding</div>
+      <span class="case-tag tag-viability">Viability</span>
+      <span class="case-tag tag-risk">Risk Mgmt</span>
+      <table>
+        <tr><th>Issue</th><th>Detail</th></tr>
+        <tr><td>Model</td><td>DBFOT with Modified Landlord Model</td></tr>
+        <tr><td>Problem</td><td>NPV negative without govt support</td></tr>
+        <tr><td>Solution</td><td>Govt funds breakwater, dredging, links</td></tr>
+        <tr><td>Risk</td><td>Transshipment traffic unpredictable</td></tr>
+        <tr><td>Failed bids</td><td>2007, 2008-09, 2010-12 all failed</td></tr>
+      </table>
+      <p style="color:#ffc107;font-size:.75rem;margin-top:10px"><b>Lesson:</b> When financial viability is low but economic viability is high &#8594; Viability Gap Funding bridges the gap.</p>
+    </div>
+
+    <!-- Airtel -->
+    <div class="case-card reveal" style="perspective:600px">
+      <h3 style="color:#2196f3">Airtel vs Jio</h3>
+      <div class="subtitle">Telecom Disruption | Voice &#8594; Data | 2016-17</div>
+      <span class="case-tag tag-asset">Asset Mgmt</span>
+      <span class="case-tag tag-smart">Smart Infra</span>
+      <table>
+        <tr><th>Metric</th><th>Impact</th></tr>
+        <tr><td>Jio launch</td><td>100M users in 170 days (free voice)</td></tr>
+        <tr><td>Airtel ARPU</td><td>Rs.200 &#8594; Rs.145 (crashed)</td></tr>
+        <tr><td>Industry debt</td><td>Rs.4.6 lakh crore</td></tr>
+        <tr><td>Revenue</td><td>-18.1% YoY decline</td></tr>
+        <tr><td>Transition</td><td>Voice assets &#8594; Data assets</td></tr>
+      </table>
+      <p style="color:#2196f3;font-size:.75rem;margin-top:10px"><b>Lesson:</b> Network = infrastructure asset. Must adapt lifecycle strategy. VoLTE = smart infra. Disruption = operational risk.</p>
+    </div>
+
+    <!-- Railways -->
+    <div class="case-card reveal" style="perspective:600px">
+      <h3 style="color:#9c27b0">Indian Railways - Gandhidham</h3>
+      <div class="subtitle">Rail-Port Connectivity | Kandla + Mundra | Gujarat</div>
+      <span class="case-tag tag-asset">Asset Mgmt</span>
+      <span class="case-tag tag-viability">Viability</span>
+      <table>
+        <tr><th>Aspect</th><th>Detail</th></tr>
+        <tr><td>Assets</td><td>Rail network, stations, gauges</td></tr>
+        <tr><td>Challenge</td><td>Capacity planning for port growth</td></tr>
+        <tr><td>Mundra</td><td>JV: Gujarat Govt + Adani (GAPL)</td></tr>
+        <tr><td>Kandla BOT</td><td>Container berths on BOT basis</td></tr>
+        <tr><td>Upgrade</td><td>MG to BG gauge conversion needed</td></tr>
+      </table>
+      <p style="color:#9c27b0;font-size:.75rem;margin-top:10px"><b>Lesson:</b> Infrastructure capacity must match demand projections. Rail = long-life asset needing lifecycle planning.</p>
+    </div>
+
+    <!-- AirAsia -->
+    <div class="case-card reveal" style="perspective:600px">
+      <h3 style="color:#ff9800">AirAsia India 2017</h3>
+      <div class="subtitle">LCC Entry | JV: AirAsia + Tata + Telestra | FDI</div>
+      <span class="case-tag tag-risk">Risk Mgmt</span>
+      <span class="case-tag tag-viability">Viability</span>
+      <table>
+        <tr><th>Risk</th><th>What Happened</th></tr>
+        <tr><td>Regulatory</td><td>FIPB, DGCA, Supreme Court challenges</td></tr>
+        <tr><td>Financial</td><td>Rs.940M loss (2014), never profitable</td></tr>
+        <tr><td>Internal</td><td>Shareholder conflict (Bhatia vs Fernandes)</td></tr>
+        <tr><td>Market</td><td>IndiGo, SpiceJet competition</td></tr>
+        <tr><td>Strategy</td><td>Single aircraft (A320), point-to-point, no frills</td></tr>
+      </table>
+      <p style="color:#ff9800;font-size:.75rem;margin-top:10px"><b>Lesson:</b> JV structure risks. FDI policy changes. Low-cost model = asset efficiency (single fleet type, high utilization).</p>
+    </div>
+  </div>
+
+  <!-- Dabhol vs Airport comparison -->
+  <h3 style="text-align:center;color:#ccc;margin:40px 0 15px" class="reveal">Dabhol vs Airport: PPP Failure vs Success</h3>
+  <table class="comp-table reveal">
+    <tr><th>Aspect</th><th style="color:#ff5252">Dabhol (Failed)</th><th style="color:#4caf50">Airport (Worked)</th></tr>
+    <tr><td>Bidding</td><td>No competition</td><td>9 pre-qualified bidders</td></tr>
+    <tr><td>Transparency</td><td>Opaque, fast-tracked</td><td>6 review committees</td></tr>
+    <tr><td>Risk sharing</td><td>All on govt/MSEB</td><td>Revenue sharing model</td></tr>
+    <tr><td>Political</td><td>No consensus, cancelled by new govt</td><td>EGoM with multi-party ministers</td></tr>
+    <tr><td>Regulation</td><td>None</td><td>AERA established</td></tr>
+    <tr><td>World Bank</td><td>Warned, ignored</td><td>IFC/ABN Amro advised</td></tr>
+  </table>
+</section>
+
+<!-- FORMULAS -->
+<section id="formulas">
+  <h2 class="reveal">Formula Sheet (20 Marks Numericals)</h2>
+
+  <div class="formula-grid">
+    <div class="formula-card reveal">
+      <h4>NPV (Net Present Value)</h4>
+      <div class="formula">NPV = -I + CF1/(1+r)^1 + CF2/(1+r)^2 + ... + CFn/(1+r)^n</div>
+      <div class="rule">NPV > 0 = ACCEPT | NPV &lt; 0 = REJECT</div>
+      <div class="example">I=10000, CF=3000/yr, 5yrs, r=10%<br>= -10000 + 2727 + 2479 + 2254 + 2050 + 1863<br>= +1,373 &#8594; ACCEPT</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>IRR (Internal Rate of Return)</h4>
+      <div class="formula">IRR = r1 + [NPV1/(NPV1-NPV2)] x (r2-r1)<br><br>Find rate where NPV = 0</div>
+      <div class="rule">IRR > required rate = ACCEPT</div>
+      <div class="example">NPV at 15% = +500, NPV at 20% = -200<br>IRR = 15 + [500/700] x 5 = 18.57%</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>BCR (Benefit-Cost Ratio)</h4>
+      <div class="formula">BCR = PV of Benefits / PV of Costs</div>
+      <div class="rule">BCR > 1 = ACCEPT | Used for govt/social projects</div>
+      <div class="example">PV Benefits=15000, PV Costs=12000<br>BCR = 15000/12000 = 1.25 &#8594; ACCEPT</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>Payback Period</h4>
+      <div class="formula">Simple: Payback = Investment / Annual CF<br><br>Unequal: Cumulate CFs until recovered</div>
+      <div class="rule">Shorter payback = Better (but ignores time value)</div>
+      <div class="example">I=10000, Annual CF=2500<br>Payback = 10000/2500 = 4 years</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>EMV (Expected Monetary Value)</h4>
+      <div class="formula">EMV = Probability x Impact (in Rs.)</div>
+      <div class="rule">Higher EMV = More critical risk</div>
+      <div class="example">Risk A: 30% x 10L = 3L<br>Risk B: 10% x 50L = 5L<br>&#8594; Risk B more critical (higher EMV)</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>Risk Score (Matrix)</h4>
+      <div class="formula">Score = Likelihood(1-5) x Consequence(1-5)</div>
+      <div class="rule">1-4: Low | 5-9: Med | 10-15: High | 16-25: Critical</div>
+      <div class="example">Prob=4, Impact=5 &#8594; Score=20 CRITICAL<br>Prob=2, Impact=3 &#8594; Score=6 MEDIUM</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>Depreciation (Straight Line)</h4>
+      <div class="formula">Dep/yr = (Cost - Salvage) / Useful Life<br><br>DRC = Replacement Cost x (Remaining/Total Life)</div>
+      <div class="rule">Used for asset valuation questions</div>
+      <div class="example">Cost=50000, Salvage=5000, Life=10yr<br>Dep = 4500/yr<br>Book Value after 6yr = 50000-(4500x6) = 23000<br>DRC: Replace=80000, 4yr left &#8594; 80000x4/10 = 32000</div>
+    </div>
+
+    <div class="formula-card reveal">
+      <h4>Present Value & Annuity</h4>
+      <div class="formula">PV = FV / (1+r)^n<br><br>PV Annuity = CF x [(1-(1+r)^-n) / r]</div>
+      <div class="rule">Building block for NPV, BCR calculations</div>
+      <div class="example">10000 after 3yr at 8%:<br>PV = 10000/1.08^3 = 7,938<br><br>5000/yr for 5yr at 10%:<br>= 5000 x 3.791 = 18,955</div>
+    </div>
+  </div>
+
+  <!-- When to use what -->
+  <h3 style="text-align:center;color:#ccc;margin:40px 0 15px" class="reveal">When to Use What?</h3>
+  <table class="comp-table reveal">
+    <tr><th>Question Type</th><th>Use This Tool</th></tr>
+    <tr><td>"Is project worth doing?"</td><td><b>NPV</b> (best overall measure)</td></tr>
+    <tr><td>"What rate of return?"</td><td><b>IRR</b></td></tr>
+    <tr><td>"Benefits vs costs for society?"</td><td><b>BCR</b> (govt projects)</td></tr>
+    <tr><td>"How fast money comes back?"</td><td><b>Payback Period</b></td></tr>
+    <tr><td>"Which risk is most critical?"</td><td><b>EMV</b> or <b>Risk Matrix</b></td></tr>
+    <tr><td>"What's asset worth now?"</td><td><b>DRC</b> (Depreciated Replacement Cost)</td></tr>
+    <tr><td>"Range of possible outcomes?"</td><td><b>Monte Carlo Simulation</b></td></tr>
+    <tr><td>"Which variable matters most?"</td><td><b>Sensitivity Analysis</b></td></tr>
+  </table>
+</section>
+
+<!-- EXAM TIPS -->
+<section id="tips">
+  <h2 class="reveal">Exam Strategy</h2>
+  <div class="tips">
+    <div class="tip-card tip-theory reveal">
+      <h4 style="color:#667eea">Theory (20m)</h4>
+      <p>Write definitions briefly, then DRAW DIAGRAMS. Risk matrix, asset lifecycle, PPP spectrum. Visual answers score more. Use the 4-pillar framework for any general question.</p>
+    </div>
+    <div class="tip-card tip-case reveal">
+      <h4 style="color:#f093fb">Case Study (20m)</h4>
+      <p>Format: 2-line context &#8594; identify theory &#8594; apply framework &#8594; specific examples from case &#8594; lessons. Compare Dabhol vs Airport for PPP questions. Always mention risk allocation.</p>
+    </div>
+    <div class="tip-card tip-num reveal">
+      <h4 style="color:#4caf50">Numericals (20m)</h4>
+      <p>Write formula FIRST. Substitute values. Show EVERY step. State decision rule. Give conclusion. Method marks > arithmetic. Even wrong numbers with right method = marks.</p>
+    </div>
+  </div>
+
+  <!-- Answer any case study -->
+  <h3 style="text-align:center;color:#ccc;margin:40px 0 15px" class="reveal">Universal Case Study Answer Framework</h3>
+  <div class="chain reveal" style="flex-wrap:wrap;justify-content:center">
+    <div class="chain-node" style="min-width:140px"><h4>1. PPP Model</h4><p>BOT/BOOT/DBFO/JVC?</p></div>
+    <span class="chain-arrow">&#8594;</span>
+    <div class="chain-node" style="min-width:140px"><h4>2. Viability</h4><p>NPV done? Fin vs Econ?</p></div>
+    <span class="chain-arrow">&#8594;</span>
+    <div class="chain-node" style="min-width:140px"><h4>3. Risks</h4><p>PFCEO framework</p></div>
+    <span class="chain-arrow">&#8594;</span>
+    <div class="chain-node" style="min-width:140px"><h4>4. Allocation</h4><p>Right party bears risk?</p></div>
+    <span class="chain-arrow">&#8594;</span>
+    <div class="chain-node" style="min-width:140px"><h4>5. Lessons</h4><p>What to do differently?</p></div>
+  </div>
+
+  <p style="text-align:center;color:#555;margin-top:60px;font-size:.8rem">Good luck tomorrow! All the best!</p>
+</section>
+
+<script>
+// Smooth scroll
+document.querySelectorAll('nav a').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth'});
+    document.querySelectorAll('nav a').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+  });
+});
+
+// Active nav on scroll
+window.addEventListener('scroll',()=>{
+  const secs=document.querySelectorAll('section');
+  let cur='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-200)cur=s.id});
+  document.querySelectorAll('nav a').forEach(a=>{
+    a.classList.remove('active');
+    if(a.getAttribute('href')==='#'+cur)a.classList.add('active');
+  });
+});
+
+// Scroll reveal
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// 3D tilt on case cards
+document.querySelectorAll('.case-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`perspective(600px) rotateY(${x*10}deg) rotateX(${-y*10}deg) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform='perspective(600px) rotateY(0) rotateX(0) scale(1)'});
+});
+</script>
+</body>
+</html>
